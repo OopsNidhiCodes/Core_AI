@@ -5,7 +5,7 @@ pydantic==2.5.0
 
 # AI/ML Libraries
 transformers==4.35.2
-torch==2.1.1
+torch==2.10.0
 tokenizers==0.15.0
 
 # Optional: OpenAI Integration
