@@ -1,10 +1,11 @@
 # CoreAI ExplainGPT
 
-A small full‑stack reference project that exposes a “GPT‑style” tokenizer/embedding
+A full‑stack reference project that exposes a “GPT‑style” tokenizer/embedding
 service over FastAPI and visualises the result in a React frontend.  
 The idea is to be able to type a sentence, see how BERT/DistilBERT splits it into
 word‑pieces, inspect the token ids, compute pairwise cosine similarities,
 project the vectors to 2‑D and (eventually) display attention weights.
+The project will provide the overall working of Large Language Models in an easy explainable manner.
 
 ---
 
@@ -44,43 +45,46 @@ project the vectors to 2‑D and (eventually) display attention weights.
 git clone https://github.com/<your‑user>/CoreAI_ExplainGPT.git
 cd CoreAI_ExplainGPT
 
-Backend setup
-Create & activate a virtual environment (recommended):
+### Running the application
+
+**Backend:**
+
+1. Create & activate a virtual environment (recommended):
+
 ```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+python -m venv .venv
+.\.venv\Scripts\activate
 ```
 
-Install dependencies:
+2. Install Python dependencies:
 
 ```bash
 pip install -r backend/requirements.txt
 ```
+3. (Optional) copy .env.example to .env and set any environment variables.
 
-### Frontend setup
+4. Start the API server:
 
-Navigate to the frontend directory:
+```bash
+cd backend
+python run.py
+```
+The API will be available at `http://localhost:8000`.
+
+**Frontend:**
+
+1. Change to the frontend directory and install packages:
 
 ```bash
 cd frontend
 npm install
 ```
+2. (Optional) add a "proxy": "http://localhost:8000" entry to
+package.json if you’d like to use relative URLs in fetch calls.
 
-### Running the application
-
-**Backend:**
-
-```bash
-cd backend
-python -m uvicorn main:app --reload
-```
-
-The API will be available at `http://localhost:8000`.
-
-**Frontend:**
+3. Start the development server:
 
 ```bash
-cd frontend
 npm start
 ```
 
@@ -93,14 +97,21 @@ The React app will open at `http://localhost:3000`.
 ```
 CoreAI_ExplainGPT/
 ├── backend/
-│   ├── main.py              # FastAPI application
-│   ├── requirements.txt      # Python dependencies
-│   └── test_api.py          # API tests
+│   ├── app/
+│   │   ├── main.py         # FastAPI application, routes, CORS setup
+│   │   ├── tokenizer.py    # wrappers around HF AutoTokenizer
+│   │   ├── embeddings.py   # compute & explain vectors, cosine, PCA, attention
+│   │   └── …  
+│   ├── run.py              # entrypoint that imports & runs `app`
+│   ├── requirements.txt
+│   └── test_api.py
 ├── frontend/
-│   ├── src/
-│   │   ├── App.jsx          # Main React component
-│   │   └── components/      # Reusable UI components
-│   └── package.json         # Node dependencies
+│   ├── public/             # CRA static assets
+│   └── src/
+│       ├── components/     # React components (App, TextInput, TokenView)
+│       ├── index.js/css
+│       └── …
+├── .gitignore
 └── README.md
 ```
 
@@ -130,6 +141,14 @@ cd backend
 pytest test_api.py
 ```
 
+## 👥 Contributing
+Feel free to open issues or pull requests.
+Suggested improvements include:
+
+Adding more models or configuration options.
+Visualising attention matrices.
+Persisting example sentences/demos.
+Deploying to a cloud provider.
 ---
 
 ## 📄 License
