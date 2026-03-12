@@ -1257,7 +1257,7 @@ function App() {
     if (!text.trim()) return;
     try {
       setLoading(true); setError(null); setResult(null); setActiveStep(null);
-      const res = await fetch("http://localhost:8000/tokenize", {
+      const res = await fetch("https://Nidhi030-core-ai-backend.hf.space/tokenize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text })
@@ -1269,7 +1269,7 @@ function App() {
       setTimeout(() => resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
     } catch (err) {
       console.error(err);
-      setError("Could not reach the backend on port 8000. Make sure it's running.");
+      setError("Could not reach the backend. The server may be waking up, please try again in 30 seconds.");
     } finally { setLoading(false); }
   };
 
