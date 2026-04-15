@@ -2,6 +2,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from datetime import datetime
+from fastapi import Body
+from .chat import get_chat_response
+from dotenv import load_dotenv
+load_dotenv()
 
 from .tokenizer import tokenize_text
 from .embeddings import (
@@ -25,6 +29,13 @@ app.add_middleware(
 class RequestModel(BaseModel):
     text: str
 
+class ChatRequest(BaseModel):
+    messages: list  # [{"role": "user", "content": "..."}]
+
+@app.post("/chat")
+async def chat(request: ChatRequest):
+    reply = get_chat_response(request.messages)
+    return {"reply": reply}
 
 @app.post("/tokenize")
 async def tokenize(request: RequestModel):

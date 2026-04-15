@@ -1,4 +1,5 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import ChatBot from "./ChatBot";
 
 // ─── GLOBAL STYLES ────────────────────────────────────────────────────────────
 const GlobalStyle = () => (
@@ -154,63 +155,59 @@ function renderLatex(raw) {
 
   let s = raw;
 
-  // Remove display/inline math wrappers
   s = s.replace(/\$\$|\\\[|\\\]/g, "").replace(/\$|\\\(|\\\)/g, "");
 
-  // Named sets & symbols
-  s = s.replace(/\\mathbb\{R\}/g,  "ℝ");
-  s = s.replace(/\\mathbb\{Z\}/g,  "ℤ");
-  s = s.replace(/\\mathbb\{N\}/g,  "ℕ");
-  s = s.replace(/\\mathbb\{Q\}/g,  "ℚ");
-  s = s.replace(/\\mathbb\{C\}/g,  "ℂ");
+  s = s.replace(/\\mathbb\{R\}/g, "ℝ");
+  s = s.replace(/\\mathbb\{Z\}/g, "ℤ");
+  s = s.replace(/\\mathbb\{N\}/g, "ℕ");
+  s = s.replace(/\\mathbb\{Q\}/g, "ℚ");
+  s = s.replace(/\\mathbb\{C\}/g, "ℂ");
 
-  // Greek letters
   const greek = {
-    alpha:"α", beta:"β", gamma:"γ", delta:"δ", epsilon:"ε", zeta:"ζ",
-    eta:"η", theta:"θ", iota:"ι", kappa:"κ", lambda:"λ", mu:"μ",
-    nu:"ν", xi:"ξ", pi:"π", rho:"ρ", sigma:"σ", tau:"τ",
-    upsilon:"υ", phi:"φ", chi:"χ", psi:"ψ", omega:"ω",
-    Alpha:"Α", Beta:"Β", Gamma:"Γ", Delta:"Δ", Epsilon:"Ε",
-    Theta:"Θ", Lambda:"Λ", Mu:"Μ", Pi:"Π", Sigma:"Σ",
-    Tau:"Τ", Phi:"Φ", Psi:"Ψ", Omega:"Ω",
+    alpha: "α", beta: "β", gamma: "γ", delta: "δ", epsilon: "ε", zeta: "ζ",
+    eta: "η", theta: "θ", iota: "ι", kappa: "κ", lambda: "λ", mu: "μ",
+    nu: "ν", xi: "ξ", pi: "π", rho: "ρ", sigma: "σ", tau: "τ",
+    upsilon: "υ", phi: "φ", chi: "χ", psi: "ψ", omega: "ω",
+    Alpha: "Α", Beta: "Β", Gamma: "Γ", Delta: "Δ", Epsilon: "Ε",
+    Theta: "Θ", Lambda: "Λ", Mu: "Μ", Pi: "Π", Sigma: "Σ",
+    Tau: "Τ", Phi: "Φ", Psi: "Ψ", Omega: "Ω",
   };
   Object.entries(greek).forEach(([name, sym]) => {
     s = s.replace(new RegExp(`\\\\${name}(?![a-zA-Z])`, "g"), sym);
   });
 
-  // Math operators & relations
-  s = s.replace(/\\times/g,    "×");
-  s = s.replace(/\\cdot/g,     "·");
-  s = s.replace(/\\div/g,      "÷");
-  s = s.replace(/\\pm/g,       "±");
-  s = s.replace(/\\leq/g,      "≤");
-  s = s.replace(/\\geq/g,      "≥");
-  s = s.replace(/\\neq/g,      "≠");
-  s = s.replace(/\\approx/g,   "≈");
-  s = s.replace(/\\equiv/g,    "≡");
-  s = s.replace(/\\sim/g,      "∼");
-  s = s.replace(/\\in/g,       "∈");
-  s = s.replace(/\\notin/g,    "∉");
-  s = s.replace(/\\subset/g,   "⊂");
+  s = s.replace(/\\times/g, "×");
+  s = s.replace(/\\cdot/g, "·");
+  s = s.replace(/\\div/g, "÷");
+  s = s.replace(/\\pm/g, "±");
+  s = s.replace(/\\leq/g, "≤");
+  s = s.replace(/\\geq/g, "≥");
+  s = s.replace(/\\neq/g, "≠");
+  s = s.replace(/\\approx/g, "≈");
+  s = s.replace(/\\equiv/g, "≡");
+  s = s.replace(/\\sim/g, "∼");
+  s = s.replace(/\\in/g, "∈");
+  s = s.replace(/\\notin/g, "∉");
+  s = s.replace(/\\subset/g, "⊂");
   s = s.replace(/\\subseteq/g, "⊆");
-  s = s.replace(/\\cup/g,      "∪");
-  s = s.replace(/\\cap/g,      "∩");
+  s = s.replace(/\\cup/g, "∪");
+  s = s.replace(/\\cap/g, "∩");
   s = s.replace(/\\emptyset/g, "∅");
-  s = s.replace(/\\infty/g,    "∞");
-  s = s.replace(/\\partial/g,  "∂");
-  s = s.replace(/\\nabla/g,    "∇");
-  s = s.replace(/\\sum/g,      "∑");
-  s = s.replace(/\\prod/g,     "∏");
-  s = s.replace(/\\int/g,      "∫");
+  s = s.replace(/\\infty/g, "∞");
+  s = s.replace(/\\partial/g, "∂");
+  s = s.replace(/\\nabla/g, "∇");
+  s = s.replace(/\\sum/g, "∑");
+  s = s.replace(/\\prod/g, "∏");
+  s = s.replace(/\\int/g, "∫");
   s = s.replace(/\\sqrt\{([^}]+)\}/g, "√($1)");
-  s = s.replace(/\\sqrt\s+(\S+)/g,    "√$1");
-  s = s.replace(/\\sqrt/g,     "√");
-  s = s.replace(/\\log/g,      "log");
-  s = s.replace(/\\ln/g,       "ln");
-  s = s.replace(/\\exp/g,      "exp");
-  s = s.replace(/\\max/g,      "max");
-  s = s.replace(/\\min/g,      "min");
-  s = s.replace(/\\arg/g,      "arg");
+  s = s.replace(/\\sqrt\s+(\S+)/g, "√$1");
+  s = s.replace(/\\sqrt/g, "√");
+  s = s.replace(/\\log/g, "log");
+  s = s.replace(/\\ln/g, "ln");
+  s = s.replace(/\\exp/g, "exp");
+  s = s.replace(/\\max/g, "max");
+  s = s.replace(/\\min/g, "min");
+  s = s.replace(/\\arg/g, "arg");
   s = s.replace(/\\text\{([^}]*)\}/g, "$1");
   s = s.replace(/\\mathrm\{([^}]*)\}/g, "$1");
   s = s.replace(/\\mathbf\{([^}]*)\}/g, "$1");
@@ -218,56 +215,41 @@ function renderLatex(raw) {
   s = s.replace(/\\boldsymbol\{([^}]*)\}/g, "$1");
   s = s.replace(/\\operatorname\{([^}]*)\}/g, "$1");
 
-  // Arrows
-  s = s.replace(/\\rightarrow/g,     "→");
-  s = s.replace(/\\leftarrow/g,      "←");
-  s = s.replace(/\\Rightarrow/g,     "⇒");
-  s = s.replace(/\\Leftarrow/g,      "⇐");
+  s = s.replace(/\\rightarrow/g, "→");
+  s = s.replace(/\\leftarrow/g, "←");
+  s = s.replace(/\\Rightarrow/g, "⇒");
+  s = s.replace(/\\Leftarrow/g, "⇐");
   s = s.replace(/\\leftrightarrow/g, "↔");
-  s = s.replace(/\\to/g,             "→");
-  s = s.replace(/\\mapsto/g,         "↦");
+  s = s.replace(/\\to/g, "→");
+  s = s.replace(/\\mapsto/g, "↦");
 
-  // Transpose T superscript — common pattern: K^T or K^\top or {K}^{T}
   s = s.replace(/\^\\top/g, "ᵀ");
   s = s.replace(/\^\{T\}/g, "ᵀ");
-  s = s.replace(/\^T\b/g,   "ᵀ");
+  s = s.replace(/\^T\b/g, "ᵀ");
 
-  // Superscripts: ^{...} → convert digits/+-n to superscript unicode
-  const supMap = {"0":"⁰","1":"¹","2":"²","3":"³","4":"⁴","5":"⁵","6":"⁶","7":"⁷","8":"⁸","9":"⁹","+":"⁺","-":"⁻","n":"ⁿ","i":"ⁱ"};
+  const supMap = { "0": "⁰", "1": "¹", "2": "²", "3": "³", "4": "⁴", "5": "⁵", "6": "⁶", "7": "⁷", "8": "⁸", "9": "⁹", "+": "⁺", "-": "⁻", "n": "ⁿ", "i": "ⁱ" };
   s = s.replace(/\^\{([^}]+)\}/g, (_, inner) => {
-    // Try to convert char by char; fall back to ^(inner) for complex ones
     const converted = [...inner].map(c => supMap[c] || null);
     return converted.every(Boolean) ? converted.join("") : `^(${inner})`;
   });
-  // Single char superscript
   s = s.replace(/\^([0-9nidkT])/g, (_, c) => supMap[c] || `^${c}`);
 
-  // Subscripts: _{...} → plain with underscore (unicode subscripts limited)
-  const subMap = {"0":"₀","1":"₁","2":"₂","3":"₃","4":"₄","5":"₅","6":"₆","7":"₇","8":"₈","9":"₉","k":"ₖ","n":"ₙ","i":"ᵢ","j":"ⱼ"};
+  const subMap = { "0": "₀", "1": "₁", "2": "₂", "3": "₃", "4": "₄", "5": "₅", "6": "₆", "7": "₇", "8": "₈", "9": "₉", "k": "ₖ", "n": "ₙ", "i": "ᵢ", "j": "ⱼ" };
   s = s.replace(/_\{([^}]+)\}/g, (_, inner) => {
     const converted = [...inner].map(c => subMap[c] || null);
     return converted.every(Boolean) ? converted.join("") : `_${inner}`;
   });
   s = s.replace(/_([0-9knji])/g, (_, c) => subMap[c] || `_${c}`);
 
-  // Fractions: \frac{a}{b} → a/b
   s = s.replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, "($1)/($2)");
-
-  // Remove remaining braces used for grouping
   s = s.replace(/\{([^{}]*)\}/g, "$1");
-  // Second pass for nested
   s = s.replace(/\{([^{}]*)\}/g, "$1");
-
-  // Remaining backslash commands (catch-all)
   s = s.replace(/\\[a-zA-Z]+\s*/g, "");
-
-  // Whitespace cleanup
   s = s.replace(/\s+/g, " ").trim();
 
   return s;
 }
 
-// Formula display component
 const Formula = ({ children }) => {
   const rendered = renderLatex(children);
   return (
@@ -295,7 +277,7 @@ function buildEmbeddingSimilarity(similarityTable) {
   if (!Array.isArray(similarityTable) || similarityTable.length === 0) return null;
   const sorted = [...similarityTable].sort((a, b) => b.similarity - a.similarity);
   const high = sorted.slice(0, 1).map(p => ({ ...p, reason: "Strong semantic or syntactic relationship" }));
-  const low  = sorted.slice(-1).map(p => ({ ...p, reason: "Very low similarity – almost unrelated" })).reverse();
+  const low = sorted.slice(-1).map(p => ({ ...p, reason: "Very low similarity – almost unrelated" })).reverse();
   return { high, low };
 }
 
@@ -328,11 +310,11 @@ const Card = ({ children, style, glow }) => (
 
 const Badge = ({ children, color = "cyan" }) => {
   const colors = {
-    cyan:   { bg: "rgba(110,231,247,0.1)",  border: "rgba(110,231,247,0.3)",  text: "var(--accent)" },
-    purple: { bg: "rgba(167,139,250,0.1)",  border: "rgba(167,139,250,0.3)",  text: "var(--accent2)" },
-    gold:   { bg: "rgba(251,191,36,0.1)",   border: "rgba(251,191,36,0.3)",   text: "var(--gold)" },
-    red:    { bg: "rgba(248,113,113,0.1)",  border: "rgba(248,113,113,0.3)",  text: "var(--danger)" },
-    green:  { bg: "rgba(52,211,153,0.1)",   border: "rgba(52,211,153,0.3)",   text: "var(--success)" },
+    cyan: { bg: "rgba(110,231,247,0.1)", border: "rgba(110,231,247,0.3)", text: "var(--accent)" },
+    purple: { bg: "rgba(167,139,250,0.1)", border: "rgba(167,139,250,0.3)", text: "var(--accent2)" },
+    gold: { bg: "rgba(251,191,36,0.1)", border: "rgba(251,191,36,0.3)", text: "var(--gold)" },
+    red: { bg: "rgba(248,113,113,0.1)", border: "rgba(248,113,113,0.3)", text: "var(--danger)" },
+    green: { bg: "rgba(52,211,153,0.1)", border: "rgba(52,211,153,0.3)", text: "var(--success)" },
   };
   const c = colors[color] || colors.cyan;
   return (
@@ -410,8 +392,8 @@ const TokenChip = ({ token }) => {
   const colors = isSpecial
     ? { bg: "rgba(52,211,153,0.1)", border: "rgba(52,211,153,0.3)", text: "var(--success)" }
     : isContinue
-    ? { bg: "rgba(248,113,113,0.1)", border: "rgba(248,113,113,0.3)", text: "var(--danger)" }
-    : { bg: "rgba(110,231,247,0.08)", border: "rgba(110,231,247,0.2)", text: "var(--accent)" };
+      ? { bg: "rgba(248,113,113,0.1)", border: "rgba(248,113,113,0.3)", text: "var(--danger)" }
+      : { bg: "rgba(110,231,247,0.08)", border: "rgba(110,231,247,0.2)", text: "var(--accent)" };
   return (
     <div style={{
       padding: "6px 12px", borderRadius: "6px",
@@ -433,12 +415,8 @@ const AttentionMatrix = ({ matrix, tokens }) => {
       <table style={{ minWidth: "max-content" }}>
         <thead>
           <tr>
-            <th style={{ background: "var(--surface2)", color: "var(--text-dim)" }}>
-              From ↓ / To →
-            </th>
-            {tokens.map((t, i) => (
-              <th key={i} style={{ fontFamily: "var(--font-mono)", fontWeight: 400, letterSpacing: 0 }}>{t}</th>
-            ))}
+            <th style={{ background: "var(--surface2)", color: "var(--text-dim)" }}>From ↓ / To →</th>
+            {tokens.map((t, i) => <th key={i} style={{ fontFamily: "var(--font-mono)", fontWeight: 400, letterSpacing: 0 }}>{t}</th>)}
           </tr>
         </thead>
         <tbody>
@@ -518,8 +496,7 @@ const EmbeddingGraph = ({ embeddingGraph }) => {
             <g key={i}>
               <circle cx={scaleX(p.x)} cy={scaleY(p.y)} r={7} fill="var(--accent)" opacity={0.9} />
               <circle cx={scaleX(p.x)} cy={scaleY(p.y)} r={13} fill="var(--accent)" opacity={0.1} />
-              <text x={scaleX(p.x) + 10} y={scaleY(p.y) + 4} fontSize="12" fill="var(--text)"
-                fontFamily="var(--font-mono)">{p.token}</text>
+              <text x={scaleX(p.x) + 10} y={scaleY(p.y) + 4} fontSize="12" fill="var(--text)" fontFamily="var(--font-mono)">{p.token}</text>
             </g>
           ))}
         </svg>
@@ -551,11 +528,11 @@ const TokenizationView = ({ tokens, tokenIds, explainedTokens }) => {
     <div className="fade-up">
       <h2>Step 1 — Tokenization</h2>
       <p>
-        Before a model can understand text, it must convert it into tokens — small chunks of text it recognizes from its vocabulary. 
+        Before a model can understand text, it must convert it into tokens — small chunks of text it recognizes from its vocabulary.
         DistilBERT uses <b>WordPiece tokenization</b>: words not in its vocabulary are split into recognizable sub-word pieces.
       </p>
       <InfoBox icon="🌍" color="cyan">
-        <b>Real-world analogy:</b> Think of tokenization like how a child learns to read — unknown words are sounded out syllable by syllable (<em>"un-be-liev-able"</em>). 
+        <b>Real-world analogy:</b> Think of tokenization like how a child learns to read — unknown words are sounded out syllable by syllable (<em>"un-be-liev-able"</em>).
         BERT does the same: an unknown word like <em>"astrophysics"</em> might become <em>["astro", "##physics"]</em>.
       </InfoBox>
 
@@ -578,7 +555,7 @@ const TokenizationView = ({ tokens, tokenIds, explainedTokens }) => {
 
       {outOfVocab.length > 0 && (
         <InfoBox icon="⚠️" color="gold">
-          <b>Out-of-vocabulary splits detected</b> — DistilBERT has a limited vocabulary (~30K words). 
+          <b>Out-of-vocabulary splits detected</b> — DistilBERT has a limited vocabulary (~30K words).
           Words outside it are split into sub-word pieces:
           <ul style={{ marginTop: "8px" }}>
             {outOfVocab.map((group, i) => {
@@ -594,7 +571,6 @@ const TokenizationView = ({ tokens, tokenIds, explainedTokens }) => {
 
       <h3>Token → Vocabulary ID</h3>
       <p>Each token is looked up in the vocabulary dictionary and assigned a unique integer ID.</p>
-      <VideoHint />
       <div style={{ overflowX: "auto", marginTop: "12px" }}>
         <table>
           <thead>
@@ -620,12 +596,12 @@ const EmbeddingsView = ({ tokens, embeddings, embeddingSimilarity, embeddingGrap
   <div className="fade-up">
     <h2>Step 2 — Embeddings</h2>
     <p>
-      Token IDs are just numbers. To give them <em>meaning</em>, the model converts each ID into a high-dimensional vector 
+      Token IDs are just numbers. To give them <em>meaning</em>, the model converts each ID into a high-dimensional vector
       (768 dimensions in DistilBERT). This vector encodes semantic and syntactic properties of the word.
     </p>
     <InfoBox icon="🌍" color="purple">
-      <b>Real-world analogy:</b> Imagine a map where cities are placed by their culture, language, and geography. 
-      "Paris" and "Rome" are close; "Paris" and "Tokyo" are far. Embeddings do the same for words — 
+      <b>Real-world analogy:</b> Imagine a map where cities are placed by their culture, language, and geography.
+      "Paris" and "Rome" are close; "Paris" and "Tokyo" are far. Embeddings do the same for words —
       <em>"king"</em> and <em>"queen"</em> will be nearby; <em>"king"</em> and <em>"pizza"</em> will be far apart.
     </InfoBox>
 
@@ -633,7 +609,6 @@ const EmbeddingsView = ({ tokens, embeddings, embeddingSimilarity, embeddingGrap
     <p style={{ fontSize: "13px", marginBottom: "8px" }}>
       DistilBERT uses 768-dimensional vectors. Each number captures a different abstract feature of the token's meaning.
     </p>
-    <VideoHint />
     <div style={{ overflowX: "auto", marginTop: "12px" }}>
       <table>
         <thead>
@@ -659,33 +634,21 @@ const EmbeddingsView = ({ tokens, embeddings, embeddingSimilarity, embeddingGrap
         <p>Cosine similarity measures how aligned two vectors are (1 = identical direction, 0 = perpendicular, −1 = opposite).</p>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginTop: "14px" }}>
           <Card style={{ padding: "16px" }}>
-            <div style={{ color: "var(--success)", fontFamily: "var(--font-display)", fontSize: "13px", fontWeight: 700, marginBottom: "8px" }}>
-              ↑ Most Similar Pair
-            </div>
+            <div style={{ color: "var(--success)", fontFamily: "var(--font-display)", fontSize: "13px", fontWeight: 700, marginBottom: "8px" }}>↑ Most Similar Pair</div>
             {embeddingSimilarity.high.map((p, i) => (
               <div key={i}>
-                <div style={{ fontFamily: "var(--font-mono)", fontSize: "14px", color: "var(--text)" }}>
-                  {p.token_1} ↔ {p.token_2}
-                </div>
-                <div style={{ color: "var(--success)", fontSize: "20px", fontWeight: 700, fontFamily: "var(--font-display)", marginTop: "4px" }}>
-                  {p.similarity}
-                </div>
+                <div style={{ fontFamily: "var(--font-mono)", fontSize: "14px", color: "var(--text)" }}>{p.token_1} ↔ {p.token_2}</div>
+                <div style={{ color: "var(--success)", fontSize: "20px", fontWeight: 700, fontFamily: "var(--font-display)", marginTop: "4px" }}>{p.similarity}</div>
                 <div style={{ fontSize: "12px", color: "var(--text-dimmer)", marginTop: "4px" }}>{p.reason}</div>
               </div>
             ))}
           </Card>
           <Card style={{ padding: "16px" }}>
-            <div style={{ color: "var(--danger)", fontFamily: "var(--font-display)", fontSize: "13px", fontWeight: 700, marginBottom: "8px" }}>
-              ↓ Least Similar Pair
-            </div>
+            <div style={{ color: "var(--danger)", fontFamily: "var(--font-display)", fontSize: "13px", fontWeight: 700, marginBottom: "8px" }}>↓ Least Similar Pair</div>
             {embeddingSimilarity.low.map((p, i) => (
               <div key={i}>
-                <div style={{ fontFamily: "var(--font-mono)", fontSize: "14px", color: "var(--text)" }}>
-                  {p.token_1} ↔ {p.token_2}
-                </div>
-                <div style={{ color: "var(--danger)", fontSize: "20px", fontWeight: 700, fontFamily: "var(--font-display)", marginTop: "4px" }}>
-                  {p.similarity}
-                </div>
+                <div style={{ fontFamily: "var(--font-mono)", fontSize: "14px", color: "var(--text)" }}>{p.token_1} ↔ {p.token_2}</div>
+                <div style={{ color: "var(--danger)", fontSize: "20px", fontWeight: 700, fontFamily: "var(--font-display)", marginTop: "4px" }}>{p.similarity}</div>
                 <div style={{ fontSize: "12px", color: "var(--text-dimmer)", marginTop: "4px" }}>Weak or no contextual relationship</div>
               </div>
             ))}
@@ -706,7 +669,11 @@ const EmbeddingsView = ({ tokens, embeddings, embeddingSimilarity, embeddingGrap
                 ["0.20 – 0.40", "Very weak", "Barely connected"],
                 ["0.00 – 0.20", "Unrelated", "No meaningful relation"],
               ].map(([score, meaning, interp]) => (
-                <tr key={score}><td style={{ fontFamily: "var(--font-mono)", fontSize: "12.5px" }}>{score}</td><td>{meaning}</td><td style={{ color: "var(--text-dimmer)" }}>{interp}</td></tr>
+                <tr key={score}>
+                  <td style={{ fontFamily: "var(--font-mono)", fontSize: "12.5px" }}>{score}</td>
+                  <td>{meaning}</td>
+                  <td style={{ color: "var(--text-dimmer)" }}>{interp}</td>
+                </tr>
               ))}
             </tbody>
           </table>
@@ -716,10 +683,7 @@ const EmbeddingsView = ({ tokens, embeddings, embeddingSimilarity, embeddingGrap
 
     <Divider />
     <h3>Embedding Space (2D PCA Projection)</h3>
-    <p>
-      768 dimensions are projected down to 2D using PCA so we can visualize them. 
-      Tokens closer together in this plot have more similar meanings.
-    </p>
+    <p>768 dimensions are projected down to 2D using PCA so we can visualize them. Tokens closer together in this plot have more similar meanings.</p>
     <EmbeddingGraph embeddingGraph={embeddingGraph} />
   </div>
 );
@@ -730,31 +694,27 @@ const AttentionView = ({ selfAttention, tokens, attentionSteps }) => (
   <div className="fade-up">
     <h2>Step 3 — Self-Attention</h2>
     <p>
-      Self-attention is the core mechanism of transformers. It allows every token to look at 
+      Self-attention is the core mechanism of transformers. It allows every token to look at
       every other token and decide how much to "attend" to it when building its own meaning.
     </p>
     <InfoBox icon="🌍" color="cyan">
-      <b>Real-world analogy:</b> In the sentence <em>"The animal didn't cross the street because it was tired"</em>, 
-      what does <em>"it"</em> refer to? A human intuitively knows it's "the animal". 
-      Self-attention teaches the model to make exactly this kind of connection — 
+      <b>Real-world analogy:</b> In the sentence <em>"The animal didn't cross the street because it was tired"</em>,
+      what does <em>"it"</em> refer to? A human intuitively knows it's "the animal".
+      Self-attention teaches the model to make exactly this kind of connection —
       <em>"it"</em> will have high attention toward <em>"animal"</em>.
     </InfoBox>
-
     <InfoBox icon="🧱" color="purple">
-      <b>DistilBERT note:</b> DistilBERT is an <b>encoder-only</b> model. It has no decoder block, 
-      so it cannot generate text. It can only <em>understand and encode</em> input — useful for 
+      <b>DistilBERT note:</b> DistilBERT is an <b>encoder-only</b> model. It has no decoder block,
+      so it cannot generate text. It can only <em>understand and encode</em> input — useful for
       classification, similarity, and comprehension tasks, but not text generation like GPT.
     </InfoBox>
 
-    {/* Attention steps */}
     {attentionSteps.length > 0 && (
       <div style={{ marginTop: "24px" }}>
         {attentionSteps.map((step, idx) => (
           <div key={step.id} style={{
-            marginBottom: "20px",
-            padding: "20px 24px",
-            background: "var(--surface2)",
-            borderRadius: "var(--radius-sm)",
+            marginBottom: "20px", padding: "20px 24px",
+            background: "var(--surface2)", borderRadius: "var(--radius-sm)",
             borderLeft: "3px solid var(--accent2)"
           }}>
             <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
@@ -789,8 +749,7 @@ const AttentionView = ({ selfAttention, tokens, attentionSteps }) => (
                       const dw = w >= 0.0001 ? w.toFixed(4) : w.toFixed(6);
                       return (
                         <li key={i}>
-                          <b>"{step.focus_token}"</b> attends to <b>"{ex.target_token}"</b>{" "}
-                          (weight: {dw})
+                          <b>"{step.focus_token}"</b> attends to <b>"{ex.target_token}"</b>{" "}(weight: {dw})
                         </li>
                       );
                     })}
@@ -805,11 +764,9 @@ const AttentionView = ({ selfAttention, tokens, attentionSteps }) => (
               </>
             )}
 
-            {/* Formulas */}
             {Array.isArray(step.formula_latex)
               ? step.formula_latex.map((f, i) => <Formula key={i}>{f}</Formula>)
               : step.formula_latex && <Formula>{step.formula_latex}</Formula>}
-            {step.formula_latex && <VideoHint />}
 
             {step.id === "step1_embeddings" && step.why_note && (
               <p style={{ marginTop: "8px" }}><b>Why this formula?</b> {step.why_note}</p>
@@ -867,7 +824,6 @@ const AttentionView = ({ selfAttention, tokens, attentionSteps }) => (
               </div>
             )}
 
-            {/* Embedding matrix table inside attention step */}
             {step.id === "step1_embeddings" && step.matrix && Array.isArray(step.matrix.preview) && step.matrix.preview.length > 0 && (
               <div style={{ marginTop: "14px" }}>
                 <h4>Input Embedding matrix X (shape: {step.matrix.shape})</h4>
@@ -904,11 +860,7 @@ const AttentionView = ({ selfAttention, tokens, attentionSteps }) => (
 
     <Divider />
     <h3>Attention Matrix — Who attends to whom?</h3>
-    <p>
-      Each cell shows how much the row token attends to the column token. 
-      Darker = stronger attention. Each row sums to 1 (softmax normalization).
-    </p>
-    <VideoHint />
+    <p>Each cell shows how much the row token attends to the column token. Darker = stronger attention. Each row sums to 1 (softmax normalization).</p>
     <AttentionMatrix matrix={selfAttention?.attention_matrix} tokens={tokens} />
 
     <div style={{ marginTop: "20px", padding: "16px 20px", background: "var(--surface2)", borderRadius: "var(--radius-sm)" }}>
@@ -917,9 +869,9 @@ const AttentionView = ({ selfAttention, tokens, attentionSteps }) => (
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginTop: "10px" }}>
         {[
           ["Q (Query)", "What this token is looking for"],
-          ["K (Key)",   "What each token offers as identity"],
+          ["K (Key)", "What each token offers as identity"],
           ["V (Value)", "What information gets passed along"],
-          ["√dₖ",       "Scaling factor to stabilize gradients"],
+          ["√dₖ", "Scaling factor to stabilize gradients"],
         ].map(([term, desc]) => (
           <div key={term} style={{ padding: "8px 10px", background: "var(--surface)", borderRadius: "6px", border: "1px solid var(--border)" }}>
             <span style={{ fontFamily: "var(--font-mono)", color: "var(--accent2)", fontSize: "13px" }}>{term}</span>
@@ -928,7 +880,6 @@ const AttentionView = ({ selfAttention, tokens, attentionSteps }) => (
         ))}
       </div>
     </div>
-
     <p style={{ marginTop: "14px", fontSize: "13px", color: "var(--text-dimmer)" }}>
       • Rows = Query token (who is asking) &nbsp;|&nbsp;
       • Columns = Key token (who is being attended to) &nbsp;|&nbsp;
@@ -943,12 +894,12 @@ const LayersView = () => (
   <div className="fade-up">
     <h2>Step 4 — Multiple Layers</h2>
     <p>
-      One attention layer is powerful, but not enough. Large language models stack the same kind of block 
+      One attention layer is powerful, but not enough. Large language models stack the same kind of block
       many times so each layer can progressively refine its understanding of the sentence.
     </p>
     <InfoBox icon="🌍" color="cyan">
-      <b>Real-world analogy:</b> Think of editing a document in stages — first pass for typos, 
-      second for grammar, third for flow, fourth for argument strength. Each pass refines at a higher level of abstraction. 
+      <b>Real-world analogy:</b> Think of editing a document in stages — first pass for typos,
+      second for grammar, third for flow, fourth for argument strength. Each pass refines at a higher level of abstraction.
       Transformer layers work the same way — early layers catch syntax, deeper layers understand meaning.
     </InfoBox>
 
@@ -968,7 +919,6 @@ const LayersView = () => (
 
     <Divider />
     <h3>What's inside each block?</h3>
-    <VideoHint />
     <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "12px" }}>
       {[
         { icon: "👁", name: "Self-Attention", desc: "Every token looks at every other token and gathers context" },
@@ -991,7 +941,7 @@ const LayersView = () => (
     </div>
 
     <InfoBox icon="📊" color="purple">
-      DistilBERT has <b>6 transformer blocks</b> (vs 12 in full BERT). It's 40% smaller and 60% faster, 
+      DistilBERT has <b>6 transformer blocks</b> (vs 12 in full BERT). It's 40% smaller and 60% faster,
       retaining ~97% of BERT's accuracy — making it ideal for learning and prototyping.
     </InfoBox>
   </div>
@@ -1003,16 +953,16 @@ const PredictionView = () => (
   <div className="fade-up">
     <h2>Step 5 — Next Token Prediction</h2>
     <p>
-      After the input passes through all transformer layers, the model produces a probability distribution 
+      After the input passes through all transformer layers, the model produces a probability distribution
       over every possible token in its vocabulary for the next position.
     </p>
     <InfoBox icon="⚠️" color="gold">
-      <b>DistilBERT cannot generate text.</b> As an encoder-only model, it has no decoder block 
-      and cannot predict next tokens. This step is shown to explain how decoder-based models like 
+      <b>DistilBERT cannot generate text.</b> As an encoder-only model, it has no decoder block
+      and cannot predict next tokens. This step is shown to explain how decoder-based models like
       GPT work — which will be demonstrated when the GPT option becomes available.
     </InfoBox>
     <InfoBox icon="🌍" color="cyan">
-      <b>Real-world analogy:</b> Autocomplete on your phone keyboard — the model scores every possible next word 
+      <b>Real-world analogy:</b> Autocomplete on your phone keyboard — the model scores every possible next word
       and shows you the most likely ones. The model doesn't "decide" — it computes probabilities and samples.
     </InfoBox>
 
@@ -1047,7 +997,6 @@ const PredictionView = () => (
 
     <Divider />
     <h3>How generation actually works (GPT-style)</h3>
-    <VideoHint />
     <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "12px" }}>
       {[
         { step: "1", title: "Greedy decoding", desc: "Always pick the highest probability token. Fast, but can be repetitive." },
@@ -1074,184 +1023,32 @@ const PredictionView = () => (
       ))}
     </div>
     <p style={{ marginTop: "14px" }}>
-      The chosen token is appended to the input, and the entire process repeats — this is called 
+      The chosen token is appended to the input, and the entire process repeats — this is called
       <b> autoregressive generation</b>. Full sentences and paragraphs emerge one token at a time.
     </p>
   </div>
 );
 
-// ─── VIDEO HINT ───────────────────────────────────────────────────────────────
-
-const VideoHint = () => (
-  <div style={{
-    display: "inline-flex", alignItems: "center", gap: "6px",
-    padding: "5px 12px",
-    background: "rgba(251,191,36,0.07)",
-    border: "1px solid rgba(251,191,36,0.25)",
-    borderRadius: "100px",
-    fontSize: "12px",
-    color: "var(--gold)",
-    fontFamily: "var(--font-mono)",
-    marginTop: "12px",
-    cursor: "default",
-  }}>
-    <span>🎓</span>
-    <span>Finding this hard? Check the prerequisite videos at the top of the page</span>
-  </div>
-);
-
-// ─── PREREQUISITES SECTION ───────────────────────────────────────────────────
-
-const PREREQ_RESOURCES = [
-  {
-    category: "Vectors & Linear Algebra",
-    icon: "📐",
-    color: "cyan",
-    videos: [
-      { title: "Vectors — Chapter 1, Essence of Linear Algebra", channel: "3Blue1Brown", url: "https://www.youtube.com/watch?v=fNk_zzaMoSs", duration: "9 min",  why: "Understand what vectors are — the foundation of embeddings" },
-      { title: "Dot Products and Duality",                        channel: "3Blue1Brown", url: "https://www.youtube.com/watch?v=LyGKycYT2v0", duration: "10 min", why: "Dot products power the Q·Kᵀ similarity score in attention" },
-      { title: "Matrix Multiplication as Composition",            channel: "3Blue1Brown", url: "https://www.youtube.com/watch?v=XkY2DOUCWMU", duration: "10 min", why: "Matrix math is behind every Q, K, V projection" },
-    ]
-  },
-  {
-    category: "Word Embeddings & Tokenization",
-    icon: "🔤",
-    color: "purple",
-    videos: [
-      { title: "Word Embedding and Word2Vec, Clearly Explained",  channel: "StatQuest", url: "https://www.youtube.com/watch?v=viZrOnJclY0", duration: "20 min", why: "Exactly how tokens become vectors — core to this project" },
-      { title: "Neural Networks Part 5: ArgMax and SoftMax",      channel: "StatQuest", url: "https://www.youtube.com/watch?v=KpKog-L9veg", duration: "15 min", why: "Softmax turns raw scores into probabilities in attention" },
-    ]
-  },
-  {
-    category: "Transformers & Attention",
-    icon: "🧠",
-    color: "gold",
-    videos: [
-      { title: "But what is a GPT? Visual intro to Transformers", channel: "3Blue1Brown", url: "https://www.youtube.com/watch?v=wjZofJX0v4M", duration: "27 min", why: "The best visual intro to the full transformer architecture" },
-      { title: "Attention in Transformers, Step by Step",         channel: "3Blue1Brown", url: "https://www.youtube.com/watch?v=eMlx5fFNoYc", duration: "26 min", why: "Deep dive into exactly what this project visualises" },
-      { title: "Transformer Neural Networks, Clearly Explained",  channel: "StatQuest",   url: "https://www.youtube.com/watch?v=zxQyTK8quyY", duration: "36 min", why: "Encoder-decoder, BERT vs GPT — perfect complement to CoreAi" },
-    ]
-  },
-];
-
-const prereqColorMap = {
-  cyan:   { border: "rgba(110,231,247,0.2)",  bg: "rgba(110,231,247,0.05)",  text: "var(--accent)",  badge: "rgba(110,231,247,0.12)" },
-  purple: { border: "rgba(167,139,250,0.2)",  bg: "rgba(167,139,250,0.05)",  text: "var(--accent2)", badge: "rgba(167,139,250,0.12)" },
-  gold:   { border: "rgba(251,191,36,0.2)",   bg: "rgba(251,191,36,0.05)",   text: "var(--gold)",    badge: "rgba(251,191,36,0.12)" },
-};
-
-const PrerequisitesSection = () => {
-  const [open, setOpen] = useState(false);
-  return (
-    <div style={{ marginBottom: "32px" }}>
-      <button
-        onClick={() => setOpen(o => !o)}
-        style={{
-          width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
-          padding: "16px 24px",
-          background: open ? "var(--surface)" : "var(--surface2)",
-          border: "1px solid var(--border-bright)",
-          borderRadius: open ? "var(--radius) var(--radius) 0 0" : "var(--radius)",
-          color: "var(--text)", cursor: "pointer",
-          fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "15px",
-          transition: "all 0.2s"
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <span style={{ fontSize: "20px" }}>🎓</span>
-          <span>Prerequisite Videos</span>
-          <Badge color="gold">8 videos</Badge>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <span style={{ fontSize: "12px", color: "var(--text-dimmer)", fontFamily: "var(--font-mono)", fontWeight: 400 }}>
-            Confused about the math? Start here
-          </span>
-          <span style={{
-            fontSize: "18px", color: "var(--text-dim)",
-            transform: open ? "rotate(180deg)" : "rotate(0deg)",
-            transition: "transform 0.25s", display: "inline-block"
-          }}>⌄</span>
-        </div>
-      </button>
-
-      {open && (
-        <div style={{
-          border: "1px solid var(--border-bright)", borderTop: "none",
-          borderRadius: "0 0 var(--radius) var(--radius)",
-          background: "var(--surface)", padding: "24px",
-        }}>
-          <p style={{ marginBottom: "20px", fontSize: "14px" }}>
-            Go through the website step by step — and whenever something feels unclear, 
-            whether it's a formula, a matrix, or a concept, come back here and find the 
-            right video. These are hand-picked in the exact order you'll need them.
-          </p>
-          <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-            {PREREQ_RESOURCES.map(section => {
-              const c = prereqColorMap[section.color];
-              return (
-                <div key={section.category}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
-                    <span style={{ fontSize: "18px" }}>{section.icon}</span>
-                    <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "14px", color: c.text }}>
-                      {section.category}
-                    </span>
-                  </div>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                    {section.videos.map(v => (
-                      <a
-                        key={v.url} href={v.url} target="_blank" rel="noreferrer"
-                        style={{
-                          display: "flex", gap: "14px", alignItems: "flex-start",
-                          padding: "14px 16px", background: c.bg,
-                          border: `1px solid ${c.border}`,
-                          borderRadius: "var(--radius-sm)", textDecoration: "none",
-                          transition: "all 0.18s",
-                        }}
-                        onMouseEnter={e => { e.currentTarget.style.borderColor = c.text; e.currentTarget.style.transform = "translateX(4px)"; }}
-                        onMouseLeave={e => { e.currentTarget.style.borderColor = c.border; e.currentTarget.style.transform = "translateX(0)"; }}
-                      >
-                        <span style={{ fontSize: "20px", flexShrink: 0, marginTop: "1px" }}>▶</span>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "14px", color: "var(--text)", marginBottom: "4px" }}>{v.title}</div>
-                          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "6px" }}>
-                            <span style={{ padding: "2px 8px", borderRadius: "100px", background: c.badge, color: c.text, fontSize: "11px", fontFamily: "var(--font-mono)" }}>{v.channel}</span>
-                            <span style={{ padding: "2px 8px", borderRadius: "100px", background: "rgba(255,255,255,0.05)", color: "var(--text-dimmer)", fontSize: "11px", fontFamily: "var(--font-mono)" }}>⏱ {v.duration}</span>
-                          </div>
-                          <div style={{ fontSize: "12.5px", color: "var(--text-dimmer)" }}>💡 {v.why}</div>
-                        </div>
-                        <span style={{ fontSize: "16px", color: "var(--text-dimmer)", flexShrink: 0, marginTop: "2px" }}>↗</span>
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
 // ─── MAIN APP ─────────────────────────────────────────────────────────────────
 
 const STEPS = [
-  { id: "tokenization", label: "Tokenization",  icon: "✂️" },
-  { id: "embeddings",   label: "Embeddings",     icon: "📊" },
-  { id: "attention",    label: "Self-Attention",  icon: "👁" },
-  { id: "layers",       label: "Layers",          icon: "🏗" },
-  { id: "prediction",   label: "Prediction",      icon: "🎯" },
-  { id: "all",          label: "View All",         icon: "▶" },
+  { id: "tokenization", label: "Tokenization", icon: "✂️" },
+  { id: "embeddings", label: "Embeddings", icon: "📊" },
+  { id: "attention", label: "Self-Attention", icon: "👁" },
+  { id: "layers", label: "Layers", icon: "🏗" },
+  { id: "prediction", label: "Prediction", icon: "🎯" },
+  { id: "all", label: "View All", icon: "▶" },
 ];
 
 function App() {
-  const [text, setText]       = useState("");
-  const [result, setResult]   = useState(null);
+  const [text, setText] = useState("");
+  const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError]     = useState(null);
-  const [model, setModel]     = useState("bert");
+  const [error, setError] = useState(null);
+  const [model, setModel] = useState("bert");
   const [activeStep, setActiveStep] = useState(null);
   const resultRef = useRef(null);
+  const stepRef = useRef(null);
 
   const handleProcess = async () => {
     if (!text.trim()) return;
@@ -1273,10 +1070,9 @@ function App() {
     } finally { setLoading(false); }
   };
 
-  // Derived data
-  const tokenization   = result?.tokenization;
-  const tokens         = tokenization?.tokens || [];
-  const tokenIds       = tokenization?.token_ids || [];
+  const tokenization = result?.tokenization;
+  const tokens = tokenization?.tokens || [];
+  const tokenIds = tokenization?.token_ids || [];
   const explainedTokens = tokenization?.explained_tokens || [];
   const embeddingPreview = result?.embedding_matrix?.preview || [];
   const embeddingsForTokens = embeddingPreview.map(row => row.vector_sample);
@@ -1284,17 +1080,17 @@ function App() {
   const embeddingGraph = Array.isArray(result?.embedding_graph)
     ? { points: result.embedding_graph }
     : result?.embedding_graph || null;
-  const selfAttention   = result?.self_attention || null;
-  const attentionSteps  = selfAttention?.detailed_steps || [];
+  const selfAttention = result?.self_attention || null;
+  const attentionSteps = selfAttention?.detailed_steps || [];
 
   const renderStep = (stepId) => {
     switch (stepId) {
       case "tokenization": return <TokenizationView tokens={tokens} tokenIds={tokenIds} explainedTokens={explainedTokens} />;
-      case "embeddings":   return <EmbeddingsView tokens={tokens} embeddings={embeddingsForTokens} embeddingSimilarity={embeddingSimilarity} embeddingGraph={embeddingGraph} />;
-      case "attention":    return <AttentionView selfAttention={selfAttention} tokens={tokens} attentionSteps={attentionSteps} />;
-      case "layers":       return <LayersView />;
-      case "prediction":   return <PredictionView />;
-      case "all":          return (
+      case "embeddings": return <EmbeddingsView tokens={tokens} embeddings={embeddingsForTokens} embeddingSimilarity={embeddingSimilarity} embeddingGraph={embeddingGraph} />;
+      case "attention": return <AttentionView selfAttention={selfAttention} tokens={tokens} attentionSteps={attentionSteps} />;
+      case "layers": return <LayersView />;
+      case "prediction": return <PredictionView />;
+      case "all": return (
         <div style={{ display: "flex", flexDirection: "column", gap: "40px" }}>
           <TokenizationView tokens={tokens} tokenIds={tokenIds} explainedTokens={explainedTokens} />
           <Divider />
@@ -1310,7 +1106,16 @@ function App() {
       default: return null;
     }
   };
-
+  useEffect(() => {
+    if (activeStep && stepRef.current) {
+      requestAnimationFrame(() => {
+        stepRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      });
+    }
+  }, [activeStep]);
   return (
     <>
       <GlobalStyle />
@@ -1326,12 +1131,9 @@ function App() {
           <div style={{
             fontFamily: "'Orbitron', sans-serif",
             fontSize: "clamp(48px, 10vw, 96px)",
-            fontWeight: 900,
-            lineHeight: 1,
-            marginBottom: "8px",
+            fontWeight: 900, lineHeight: 1, marginBottom: "8px",
             background: "linear-gradient(135deg, var(--accent) 0%, var(--accent2) 60%, var(--accent3) 100%)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
+            WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
             letterSpacing: "0.08em",
           }}>
             CoreAi
@@ -1339,21 +1141,15 @@ function App() {
           <h1 style={{
             fontFamily: "var(--font-display)",
             fontSize: "clamp(16px, 3vw, 24px)",
-            fontWeight: 600,
-            lineHeight: 1.2,
-            marginBottom: "20px",
-            color: "var(--text-dim)",
-            letterSpacing: "0.02em",
+            fontWeight: 600, lineHeight: 1.2, marginBottom: "20px",
+            color: "var(--text-dim)", letterSpacing: "0.02em",
           }}>
             Inside the Large Language Model
           </h1>
-          <p style={{
-            maxWidth: "560px", margin: "0 auto 28px",
-            fontSize: "17px", color: "var(--text-dim)", lineHeight: 1.7
-          }}>
-            A Large Language Model is a neural network trained to predict the next token in a sequence. 
-            It doesn't "think" — it learns statistical patterns from massive text corpora 
-            and computes probabilities. Enter any sentence below to see exactly how 
+          <p style={{ maxWidth: "560px", margin: "0 auto 28px", fontSize: "17px", color: "var(--text-dim)", lineHeight: 1.7 }}>
+            A Large Language Model is a neural network trained to predict the next token in a sequence.
+            It doesn't "think" — it learns statistical patterns from massive text corpora
+            and computes probabilities. Enter any sentence below to see exactly how
             your words flow through a real transformer, step by step.
           </p>
           <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
@@ -1363,12 +1159,8 @@ function App() {
           </div>
         </div>
 
-        {/* ── PREREQUISITES ── */}
-        <PrerequisitesSection />
-
         {/* ── INPUT CARD ── */}
         <Card className="fade-up-1" glow style={{ marginBottom: "32px" }}>
-          {/* Model selector */}
           <div style={{ marginBottom: "20px" }}>
             <div style={{
               fontSize: "11px", fontFamily: "var(--font-display)", fontWeight: 700,
@@ -1378,7 +1170,6 @@ function App() {
               Select Model
             </div>
             <div style={{ display: "flex", gap: "10px" }}>
-              {/* BERT button */}
               <button onClick={() => setModel("bert")} style={{
                 flex: 1, padding: "14px 20px",
                 background: model === "bert" ? "rgba(110,231,247,0.08)" : "var(--surface2)",
@@ -1390,8 +1181,7 @@ function App() {
                 transition: "all 0.2s"
               }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
-                  <span>⚡</span>
-                  <span>DistilBERT</span>
+                  <span>⚡</span><span>DistilBERT</span>
                   {model === "bert" && <Badge color="green">Active</Badge>}
                 </div>
                 <div style={{ fontSize: "11.5px", color: "var(--text-dimmer)", fontWeight: 400, marginTop: "4px" }}>
@@ -1399,19 +1189,16 @@ function App() {
                 </div>
               </button>
 
-              {/* GPT button (disabled) */}
               <button disabled style={{
                 flex: 1, padding: "14px 20px",
-                background: "var(--surface2)",
-                border: "1.5px solid var(--border)",
+                background: "var(--surface2)", border: "1.5px solid var(--border)",
                 borderRadius: "var(--radius-sm)",
                 cursor: "not-allowed", color: "var(--text-dimmer)",
                 fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "15px",
                 opacity: 0.5
               }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
-                  <span>🔮</span>
-                  <span>GPT-2</span>
+                  <span>🔮</span><span>GPT-2</span>
                   <Badge color="purple">Coming Soon</Badge>
                 </div>
                 <div style={{ fontSize: "11.5px", color: "var(--text-dimmer)", fontWeight: 400, marginTop: "4px" }}>
@@ -1421,7 +1208,6 @@ function App() {
             </div>
           </div>
 
-          {/* Textarea */}
           <div style={{ position: "relative" }}>
             <textarea
               rows={3}
@@ -1431,31 +1217,24 @@ function App() {
               onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleProcess(); } }}
               style={{
                 width: "100%", padding: "16px 18px",
-                background: "var(--surface2)",
-                border: "1px solid var(--border-bright)",
+                background: "var(--surface2)", border: "1px solid var(--border-bright)",
                 borderRadius: "var(--radius-sm)",
                 color: "var(--text)", fontFamily: "var(--font-body)", fontSize: "15px",
-                lineHeight: 1.6, resize: "none",
-                outline: "none", transition: "border-color 0.2s",
+                lineHeight: 1.6, resize: "none", outline: "none", transition: "border-color 0.2s",
               }}
               onFocus={e => e.target.style.borderColor = "rgba(110,231,247,0.4)"}
               onBlur={e => e.target.style.borderColor = "var(--border-bright)"}
             />
           </div>
 
-          {/* Process button */}
           <button onClick={handleProcess} disabled={loading || !text.trim()} style={{
-            marginTop: "14px",
-            display: "flex", alignItems: "center", gap: "10px",
+            marginTop: "14px", display: "flex", alignItems: "center", gap: "10px",
             padding: "13px 28px",
             background: loading ? "rgba(110,231,247,0.05)" : "rgba(110,231,247,0.1)",
-            border: "1px solid rgba(110,231,247,0.35)",
-            borderRadius: "var(--radius-sm)",
-            color: "var(--accent)",
-            fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "15px",
+            border: "1px solid rgba(110,231,247,0.35)", borderRadius: "var(--radius-sm)",
+            color: "var(--accent)", fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "15px",
             cursor: loading || !text.trim() ? "not-allowed" : "pointer",
-            opacity: !text.trim() ? 0.5 : 1,
-            transition: "all 0.2s",
+            opacity: !text.trim() ? 0.5 : 1, transition: "all 0.2s",
             animation: !loading && text.trim() ? "pulse-glow 2.5s ease-in-out infinite" : "none"
           }}>
             {loading ? <Spinner /> : <span>→</span>}
@@ -1478,18 +1257,16 @@ function App() {
           <div style={{ display: "flex", gap: "14px", alignItems: "flex-start" }}>
             <span style={{ fontSize: "24px" }}>💡</span>
             <div>
-              <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, marginBottom: "6px" }}>
-                About DistilBERT
-              </div>
+              <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, marginBottom: "6px" }}>About DistilBERT</div>
               <p style={{ marginBottom: "6px" }}>
-                This project uses <b>DistilBERT</b> — a distilled (compressed) version of BERT. It's 
-                40% smaller and 60% faster while retaining ~97% of BERT's accuracy. 
-                However, its <b>smaller vocabulary</b> and <b>fewer training steps</b> mean 
+                This project uses <b>DistilBERT</b> — a distilled (compressed) version of BERT. It's
+                40% smaller and 60% faster while retaining ~97% of BERT's accuracy.
+                However, its <b>smaller vocabulary</b> and <b>fewer training steps</b> mean
                 semantic similarity results may be less precise than full-scale models.
               </p>
               <p style={{ marginBottom: 0 }}>
-                <b>Important:</b> DistilBERT is <b>encoder-only</b> — it has no decoder block. 
-                This means it can deeply <em>understand</em> text but <em>cannot generate</em> new text 
+                <b>Important:</b> DistilBERT is <b>encoder-only</b> — it has no decoder block.
+                This means it can deeply <em>understand</em> text but <em>cannot generate</em> new text
                 the way GPT can. The prediction step is shown for educational purposes only.
               </p>
             </div>
@@ -1499,43 +1276,41 @@ function App() {
         {/* ── RESULTS ── */}
         {result && (
           <div ref={resultRef}>
-            {/* Step navigator */}
             <div style={{
               display: "flex", gap: "8px", flexWrap: "wrap",
               marginBottom: "24px", position: "sticky", top: "16px", zIndex: 10,
               padding: "12px 16px",
-              background: "rgba(10,11,15,0.92)",
-              backdropFilter: "blur(12px)",
-              borderRadius: "var(--radius)",
-              border: "1px solid var(--border)"
+              background: "rgba(10,11,15,0.92)", backdropFilter: "blur(12px)",
+              borderRadius: "var(--radius)", border: "1px solid var(--border)"
             }}>
               {STEPS.map(s => (
                 <StepBtn
-                  key={s.id}
-                  icon={s.icon}
-                  label={s.label}
+                  key={s.id} icon={s.icon} label={s.label}
                   active={activeStep === s.id}
                   onClick={() => setActiveStep(s.id)}
                 />
               ))}
             </div>
 
-            {/* Step content */}
-            <Card key={activeStep}>
+            <div
+              ref={stepRef}
+              style={{ scrollMarginTop: "125px" }} // 🔥 THIS FIXES EVERYTHING
+            >
               {renderStep(activeStep)}
-            </Card>
+            </div>
           </div>
         )}
 
         {/* ── FOOTER ── */}
         <div style={{
           marginTop: "64px", textAlign: "center",
-          fontSize: "12px", color: "var(--text-dimmer)",
-          fontFamily: "var(--font-mono)"
+          fontSize: "12px", color: "var(--text-dimmer)", fontFamily: "var(--font-mono)"
         }}>
           CoreAi · Built with DistilBERT · FastAPI backend · React frontend
         </div>
       </div>
+
+      <ChatBot />
     </>
   );
 }
