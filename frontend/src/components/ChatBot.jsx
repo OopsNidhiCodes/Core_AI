@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 
-const API_URL = "http://localhost:8000/chat";
+const API_URL = "https://Nidhi030-core-ai-backend.hf.space/chat";
 const SUGGESTIONS = ["What is tokenization?", "How do embeddings work?", "Explain attention"];
 
 // ─── VIDEO MAP ────────────────────────────────────────────────────────────────
